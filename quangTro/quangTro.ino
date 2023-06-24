@@ -16,7 +16,7 @@ void loop() {
   int sensorValue = analogRead(sensorPinA0);
   float Vo = sensorValue * Vref / 1024.0;
   float RB = (10 * Vo) / (5 - Vo);
-  float EB = EA / (pow(10, (log10(RA/RB)/y)));
+  float EB = EA * (pow(10, (log10(RA/RB)/y)));
   Serial.print("EB = ");
   Serial.print(EB, 3);
   Serial.println("(lx)");
