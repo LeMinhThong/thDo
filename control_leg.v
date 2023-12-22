@@ -1,7 +1,7 @@
-module testtest(
+module control_led(
   input   pclk,
   input   button,
-  output reg  [7:0] leg
+  output reg  [7:0] led
 );
 reg [31:0] press_count, release_count, press_catch, release_catch;
 reg start_case; 
@@ -105,7 +105,6 @@ end
 always @(posedge pclk) begin //press_catch
   if (button == 1'b1 && press_count != 32'h0000_0000) begin
     press_catch <= press_count;
-    //start_case <= 1'b1;
   end else begin
     press_catch <= press_catch;
   end
@@ -119,70 +118,66 @@ always @(posedge pclk) begin //release_catch
   end
 end
 
-always @(posedge pclk) begin //control_leg
+always @(posedge pclk) begin //control_led
   if (click == 2'b01) begin
     if (press_catch < 32'd100000000) begin
-      leg <= 8'hff;
+      led <= 8'hff;
     end else if (press_catch >= 32'd100000000 && press_catch < 32'd250000000) begin
       if (start_case == 1'b1) begin
-        leg <= 8'h01;
-        //start_case <= 1'b0;
+        led <= 8'h01;
       end else begin
-        if (leg == 8'h00) begin
-          leg <= 8'h01;
+        if (led == 8'h00) begin
+          led <= 8'h01;
         end else begin
           if (count_en == 1'b1) begin
-            leg <= {leg[6:0], 1'b0};
+            led <= {led[6:0], 1'b0};
           end else begin
-            leg <= leg;
+            led <= led;
           end
         end
       end
     end else if (press_catch >= 32'd250000000) begin
       if (start_case == 1'b1) begin
-        leg <= 8'h80;
-        //start_case <= 1'b0;
+        led <= 8'h80;
       end else begin
-        if (leg == 8'h00) begin
-          leg <= 8'h80;
+        if (led == 8'h00) begin
+          led <= 8'h80;
         end else begin
           if (count_en == 1'b1) begin
-            leg <= {1'b0, leg[7:1]};
+            led <= {1'b0, led[7:1]};
           end else begin
-            leg <= leg;
+            led <= led;
           end
         end
       end
     end else begin
-      leg <= leg;
+      led <= led;
     end
   end else if(click == 2'b10) begin
     if (start_case == 1'b1) begin
-      leg <= 8'h81;
-      //start_case <= 1'b0;
+      led <= 8'h81;
     end else begin
-      if (leg == 8'h00) begin
-        leg <= 8'h81;
+      if (led == 8'h00) begin
+        led <= 8'h81;
       end else begin
         if (count_en == 1'b1) begin
-          leg <= {1'b0, leg[7:5], leg[2:0], 1'b0};
+          led <= {1'b0, led[7:5], led[2:0], 1'b0};
         end else begin
-          leg <= leg;
+          led <= led;
         end
       end
     end
   end else begin
     if (start_case == 1'b1) begin
-      leg <= 8'h18;
-      //start_case <= 1'b0;
+      led <= 8'h18;
     end else begin
-      if (leg <= 8'h00) begin
-        leg <= 8'h18;
+      if (led <= 8'h00) begin
+        led <= 8'h18;
       end else begin
         if (count_en == 1'b1) begin
-          leg <= {leg[6:4], 1'b0, 1'b0, leg[3:1]};
+          led <= {led[6:4], 1'b0, 1'b0, led[3:1]};
         end else begin
-          leg <= leg;
+          led <= led;
         end
       end
     end
