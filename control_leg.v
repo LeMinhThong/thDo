@@ -1,9 +1,9 @@
-module control_leg(
+module testtest(
   input   pclk,
   input   button,
   output reg  [7:0] leg
 );
-reg [7:0] press_count, release_count, press_catch, release_catch;
+reg [31:0] press_count, release_count, press_catch, release_catch;
 reg start_case; 
 reg [1:0] click;
 
@@ -16,8 +16,7 @@ always @(posedge clk1) clk2 <= ~clk2;
 always @(posedge clk2) clk3 <= ~clk3; 
 always @(posedge clk3) clk4 <= ~clk4; 
 always @(posedge clk4) clk5 <= ~clk5; 
-always @(posedge clk5) clk6 <= ~clk6; 
-always @(posedge clk6) clk6 <= ~clk6; 
+always @(posedge clk5) clk6 <= ~clk6;  
 always @(posedge clk6) clk7 <= ~clk7; 
 always @(posedge clk7) clk8 <= ~clk8; 
 always @(posedge clk8) clk9 <= ~clk9; 
@@ -42,24 +41,24 @@ always @(posedge clk24) clk25 <= ~clk25;
 reg last_clk_in;
 wire count_en;
 always @(posedge pclk) begin //posedge detection
-  last_clk_in <= clk2;
+  last_clk_in <= clk25;
 end
-assign count_en = ~last_clk_in & clk2;
+assign count_en = ~last_clk_in & clk25;
 
 
 always @(posedge pclk) begin //count
   if (button == 1'b0) begin
     press_count <= press_count + 1'b1;
-    release_count <= 8'h00;
+    release_count <= 32'h0000_0000;
   end else begin
-    press_count <= 8'h00;
+    press_count <= 32'h0000_0000;
     release_count <= release_count + 1'b1;
   end
 end
 
 always @(posedge pclk) begin //click
-  if(button == 1'b0 && release_catch != 8'h00) begin
-    if(release_catch < 8'h5) begin
+  if(button == 1'b0 && release_catch != 32'h0000_0000) begin
+    if(release_catch < 32'd25000000) begin
       click <= click + 1'b1;
     end else begin
       click <= 2'b01;
@@ -69,10 +68,44 @@ always @(posedge pclk) begin //click
   end
 end
 
+always @(posedge pclk) begin //start case
+	if (button == 1'b1 && press_count != 32'h0000_0000) begin
+		start_case <= 1'b1;
+	end else if (click == 2'b01) begin
+		if (press_catch >= 32'd100000000 && press_catch < 32'd250000000) begin
+			if (start_case == 1'b1) begin
+				start_case <= 1'b0;
+			end else begin
+				start_case <= start_case;
+			end
+		end else if (press_catch >= 32'd250000000) begin
+			if (start_case == 1'b1) begin
+				start_case <= 1'b0;
+			end else begin
+				start_case <= start_case;
+			end
+		end else begin
+			start_case <= start_case;
+		end
+	end else if (click == 2'b10) begin
+		if (start_case == 1'b1) begin
+			start_case <= 1'b0;
+		end else begin
+			start_case <= start_case;
+		end
+	end else begin
+		if (start_case == 1'b1) begin
+			start_case <= 1'b0;
+		end else begin
+			start_case <= start_case;
+		end
+	end
+end
+
 always @(posedge pclk) begin //press_catch
-  if (button == 1'b1 && press_count != 8'h00) begin
+  if (button == 1'b1 && press_count != 32'h0000_0000) begin
     press_catch <= press_count;
-    start_case <= 1'b1;
+    //start_case <= 1'b1;
   end else begin
     press_catch <= press_catch;
   end
@@ -88,12 +121,12 @@ end
 
 always @(posedge pclk) begin //control_leg
   if (click == 2'b01) begin
-    if (press_catch < 8'd20) begin
+    if (press_catch < 32'd100000000) begin
       leg <= 8'hff;
-    end else if (press_catch >= 8'd20 && press_catch < 8'd50) begin
+    end else if (press_catch >= 32'd100000000 && press_catch < 32'd250000000) begin
       if (start_case == 1'b1) begin
         leg <= 8'h01;
-        start_case <= 1'b0;
+        //start_case <= 1'b0;
       end else begin
         if (leg == 8'h00) begin
           leg <= 8'h01;
@@ -105,10 +138,10 @@ always @(posedge pclk) begin //control_leg
           end
         end
       end
-    end else if (press_catch >= 8'd50) begin
+    end else if (press_catch >= 32'd250000000) begin
       if (start_case == 1'b1) begin
         leg <= 8'h80;
-        start_case <= 1'b0;
+        //start_case <= 1'b0;
       end else begin
         if (leg == 8'h00) begin
           leg <= 8'h80;
@@ -126,7 +159,7 @@ always @(posedge pclk) begin //control_leg
   end else if(click == 2'b10) begin
     if (start_case == 1'b1) begin
       leg <= 8'h81;
-      start_case <= 1'b0;
+      //start_case <= 1'b0;
     end else begin
       if (leg == 8'h00) begin
         leg <= 8'h81;
@@ -141,7 +174,7 @@ always @(posedge pclk) begin //control_leg
   end else begin
     if (start_case == 1'b1) begin
       leg <= 8'h18;
-      start_case <= 1'b0;
+      //start_case <= 1'b0;
     end else begin
       if (leg <= 8'h00) begin
         leg <= 8'h18;
